@@ -10,6 +10,7 @@ import { useClerk } from "@clerk/nextjs";
 import { EditorPanelSkeleton } from "./EditorPanelSkeleton";
 import useMounted from "@/hooks/useMounted";
 import ShareSnippetDialog from "./ShareSnippetDialog";
+import * as monaco from "monaco-editor";  // Importing Monaco properly
 
 function EditorPanel() {
   const clerk = useClerk();
@@ -21,17 +22,17 @@ function EditorPanel() {
   useEffect(() => {
     const savedCode = localStorage.getItem(`editor-code-${language}`);
     const newCode = savedCode || LANGUAGE_CONFIG[language].defaultCode;
-    if (editor) editor.setValue(newCode);
-  }, [language, editor]);
 
-  useEffect(() => {
-    const savedFontSize = localStorage.getItem("editor-font-size");
-    if (savedFontSize) setFontSize(parseInt(savedFontSize));
-  }, [setFontSize]);
+    if (editor) {
+      (editor as unknown as monaco.editor.IStandaloneCodeEditor).setValue(newCode); // Correct type casting
+    }
+  }, [language, editor]);
 
   const handleRefresh = () => {
     const defaultCode = LANGUAGE_CONFIG[language].defaultCode;
-    if (editor) editor.setValue(defaultCode);
+    if (editor) {
+      (editor as unknown as monaco.editor.IStandaloneCodeEditor).setValue(defaultCode); // Correct type casting
+    }
     localStorage.removeItem(`editor-code-${language}`);
   };
 
@@ -104,7 +105,7 @@ function EditorPanel() {
           </div>
         </div>
 
-        {/* Editor  */}
+        {/* Editor */}
         <div className="relative group rounded-xl overflow-hidden ring-1 ring-white/[0.05]">
           {clerk.loaded && (
             <Editor
@@ -113,7 +114,7 @@ function EditorPanel() {
               onChange={handleEditorChange}
               theme={theme}
               beforeMount={defineMonacoThemes}
-              onMount={(editor) => setEditor(editor)}
+              onMount={(editor: monaco.editor.IStandaloneCodeEditor) => setEditor(editor as unknown as typeof monaco)} // Typecast here to the proper editor type
               options={{
                 minimap: { enabled: false },
                 fontSize,
@@ -145,4 +146,5 @@ function EditorPanel() {
     </div>
   );
 }
+
 export default EditorPanel;
