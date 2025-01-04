@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import * as monaco from "monaco-editor/esm/vs/editor/editor.api"; // Correct import for Monaco editor API
+import * as monaco from "monaco-editor";
 import { CodeEditorState } from "./../types/index";
 
 // Get initial state from local storage or fallback to defaults
@@ -23,6 +23,7 @@ const getInitialState = () => {
   };
 };
 
+// Create Zustand store for managing the Code Editor state
 export const useCodeEditorStore = create<CodeEditorState>((set, get) => {
   const initialState = getInitialState();
 
@@ -31,30 +32,36 @@ export const useCodeEditorStore = create<CodeEditorState>((set, get) => {
     output: "",
     isRunning: false,
     error: null,
-    editor: null as monaco.editor.IStandaloneCodeEditor | null, // Correct typing for Monaco editor
+    editorInstance: null,  // Initial state for Monaco editor instance
+    // Removed executionResult from state as it's not needed
 
+    // Get code from the editor
     getCode: () => {
-      const editor = get().editor;
+      const editor = get().editorInstance;
       if (editor) {
         return editor.getValue(); // Ensure this is the correct editor instance
       }
       return "";
     },
 
-    setEditor: (editor: monaco.editor.IStandaloneCodeEditor) => {
-      set({ editor });
+    // Set the Monaco editor instance
+    setEditorInstance: (editor: monaco.editor.IStandaloneCodeEditor) => {
+      set({ editorInstance: editor });
     },
 
+    // Set the editor theme
     setTheme: (theme: string) => {
       localStorage.setItem("editor-theme", theme);
       set({ theme });
     },
 
+    // Set the editor font size
     setFontSize: (fontSize: number) => {
       localStorage.setItem("editor-font-size", fontSize.toString());
       set({ fontSize });
     },
 
+    // Set the language for the editor
     setLanguage: (language: string) => {
       localStorage.setItem("editor-language", language);
       set({
@@ -64,6 +71,7 @@ export const useCodeEditorStore = create<CodeEditorState>((set, get) => {
       });
     },
 
+    // Run the code (API call simulation)
     runCode: async () => {
       const { language, getCode } = get();
       const code = getCode();
@@ -115,7 +123,10 @@ export const useCodeEditorStore = create<CodeEditorState>((set, get) => {
         set({ isRunning: false });
       }
     },
+
+    // Placeholder for upcoming functionality
+    comingSoon: () => {
+      set({ output: "Coming soon!" });
+    },
   };
 });
-
-export const getExecutionResult = () => useCodeEditorStore.getState().executionResult;
