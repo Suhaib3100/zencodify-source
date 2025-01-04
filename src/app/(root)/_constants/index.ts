@@ -1,4 +1,3 @@
-import { Monaco } from "@monaco-editor/react";
 import { Theme } from "../../../types";
 import * as monaco from 'monaco-editor';
 
